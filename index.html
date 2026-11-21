@@ -1,635 +1,630 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Behind the Veil of Ignorance - Identity Lottery</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    .card-box {
-      perspective: 1000px;
-      -webkit-perspective: 1000px;
+    @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;800&display=swap');
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+      color: #f8fafc;
+      min-height: 100vh;
     }
-    .card-face {
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    .card-pop {
+      animation: popIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    @keyframes pop {
-      0% { transform: scale(0.9); }
-      50% { transform: scale(1.05); }
-      100% { transform: scale(1); }
-    }
-    .pop-in {
-      animation: pop 0.3s ease-out forwards;
-    }
-    @keyframes pulse-ring {
-      0% { transform: scale(0.98); opacity: 0.9; }
-      50% { transform: scale(1.02); opacity: 1; }
-      100% { transform: scale(0.98); opacity: 0.9; }
-    }
-    .pulse-glow {
-      animation: pulse-ring 1.8s infinite ease-in-out;
+    @keyframes popIn {
+      0% { opacity: 0; transform: translateY(12px) scale(0.98); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
     }
   </style>
 </head>
-<body class="bg-slate-900 min-h-screen flex items-center justify-center p-3 font-sans text-slate-800">
+<body class="flex flex-col items-center justify-center p-4 sm:p-6">
 
-  <div class="max-w-lg w-full bg-slate-50 rounded-3xl shadow-2xl border border-slate-700">
-    
-    <!-- 상단 헤더 -->
-    <div class="bg-gradient-to-r from-indigo-700 via-indigo-600 to-purple-700 text-white p-6 text-center rounded-t-3xl shadow-md">
-      <div class="inline-block px-3 py-1 bg-indigo-900/60 rounded-full text-xs tracking-widest uppercase font-semibold text-indigo-200 border border-indigo-400/30 mb-1.5">
-        SDGs Inquiry Simulation
+  <div class="w-full max-w-2xl bg-slate-900/90 border border-slate-700/80 rounded-3xl shadow-2xl overflow-hidden">
+    <!-- Top Header -->
+    <header class="bg-indigo-950/80 border-b border-indigo-800/50 px-6 py-4 flex items-center justify-between">
+      <div>
+        <span class="text-xs font-bold uppercase tracking-wider text-indigo-300">Grade 3 English &times; UN SDGs</span>
+        <h1 class="text-lg sm:text-xl font-extrabold text-white">Behind the Veil of Ignorance</h1>
       </div>
-      <h1 class="text-2xl font-black tracking-tight">Behind the Veil of Ignorance</h1>
-      <p class="text-sm text-indigo-100 mt-1">무지의 베일: 당신은 어떤 조건으로 태어나시겠습니까?</p>
-      
-      <!-- 점수 디스플레이 -->
-      <div id="scoreContainer" class="hidden mt-4 bg-slate-900/75 p-3 rounded-xl border border-white/10 flex items-center justify-between px-4">
-        <span class="text-sm font-semibold text-slate-200">Life Security Score (삶의 안정도)</span>
-        <div id="scoreDisplay" class="text-2xl font-black text-amber-300">50 pts</div>
+      <div id="scoreBadge" class="hidden bg-slate-800 border border-slate-600 px-3.5 py-1.5 rounded-full text-sm font-bold">
+        Score: <span id="currentScoreText" class="text-emerald-400">100</span> pts
       </div>
-    </div>
+    </header>
 
-    <!-- 메인 컨테이너 -->
-    <div class="p-5 sm:p-6">
-      
-      <!-- ================= 1단계: 신분 추첨 카드 선택 화면 ================= -->
-      <div id="lotteryScreen" class="space-y-4">
-        <div class="text-center">
-          <h2 class="text-base font-extrabold text-slate-800">Draw Your 6 Social Identities</h2>
-          <p class="text-xs sm:text-sm text-slate-600 mt-0.5">6개의 카드를 터치하거나 아래 버튼을 눌러 무작위 추첨하세요.</p>
+    <!-- SCREEN 1: INTRO & IDENTITY DRAW -->
+    <section id="screenIntro" class="p-6 sm:p-8 text-center card-pop">
+      <div class="inline-block bg-indigo-500/20 text-indigo-300 text-xs font-semibold px-3 py-1 rounded-full mb-3">
+        Step 1. Identity Lottery (신분 뽑기)
+      </div>
+      <h2 class="text-2xl sm:text-3xl font-extrabold mb-3">태어나기 전, 무지의 베일 뒤에서</h2>
+      <p class="text-slate-300 text-sm sm:text-base leading-relaxed mb-6">
+        당신은 내일 새로운 세상에서 태어납니다.<br/>
+        버튼을 눌러 <strong>6가지 삶의 조건(나이·성별·출신·경제력·건강·주거)</strong>을 무작위로 뽑아보세요!
+      </p>
+
+      <div id="identityGrid" class="hidden grid-cols-2 sm:grid-cols-3 gap-3 text-left mb-6"></div>
+
+      <button id="drawBtn" onclick="drawIdentity()"
+        class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-500 active:scale-95 transition text-white font-bold px-8 py-4 rounded-2xl shadow-lg shadow-indigo-600/30 text-base">
+        🎲 내 신분 카드 뽑기 (Draw My Identity)
+      </button>
+
+      <button id="startSimBtn" onclick="startSimulation()"
+        class="hidden w-full bg-emerald-600 hover:bg-emerald-500 active:scale-95 transition text-white font-bold px-8 py-4 rounded-2xl shadow-lg shadow-emerald-600/30 text-base mt-2">
+        8가지 현실 위기 체험 시작하기 &rarr;
+      </button>
+    </section>
+
+    <!-- SCREEN 2: 8 CRISIS SITUATIONS -->
+    <section id="screenSim" class="hidden p-6 sm:p-8 card-pop">
+      <!-- Mini Identity Summary Bar -->
+      <div id="miniProfile" class="flex flex-wrap gap-1.5 mb-5 pb-4 border-b border-slate-800 text-xs"></div>
+
+      <!-- Progress -->
+      <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
+        <span id="stepCounter" class="font-bold text-indigo-300">Situation 1 / 8</span>
+        <span>Starting Score: 100 pts</span>
+      </div>
+      <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden mb-6">
+        <div id="progressBar" class="bg-indigo-500 h-full transition-all duration-300" style="width: 12.5%"></div>
+      </div>
+
+      <!-- Situation Card -->
+      <div id="situationBox" class="bg-slate-800/80 border border-slate-700 rounded-2xl p-5 sm:p-6 mb-6">
+        <div class="flex items-center gap-2.5 mb-2">
+          <span id="sitIcon" class="text-2xl">🌧️</span>
+          <div>
+            <h3 id="sitTitleEn" class="text-lg font-extrabold text-white"></h3>
+            <p id="sitTitleKo" class="text-xs text-indigo-300 font-semibold"></p>
+          </div>
         </div>
+        <p id="sitPrompt" class="text-slate-300 text-sm mb-4 leading-relaxed"></p>
 
-        <!-- 6개 신분 카드 그리드 -->
-        <div class="grid grid-cols-2 gap-3" id="cardGrid">
-          
-          <!-- 카드 1: 나이 -->
-          <div class="card-box h-36 cursor-pointer select-none" onclick="flipSingleCard('age')">
-            <div id="front-age" class="card-face w-full h-full bg-indigo-50 border-2 border-dashed border-indigo-300 hover:border-indigo-500 hover:bg-indigo-100/60 rounded-2xl flex flex-col items-center justify-center p-3 shadow-sm">
-              <span class="text-3xl mb-1.5">🎂</span>
-              <span class="text-sm font-bold text-indigo-900">Age (나이)</span>
-              <span class="text-xs text-indigo-600 font-semibold mt-1.5 bg-indigo-100 px-2.5 py-0.5 rounded-full">Tap to Draw</span>
-            </div>
-            <div id="back-age" class="card-face hidden w-full h-full bg-white border-2 border-indigo-500 rounded-2xl flex flex-col items-center justify-center p-2.5 text-center shadow-md pop-in">
-              <span class="text-xs font-extrabold text-indigo-600 uppercase tracking-wider">Age (나이)</span>
-              <p id="textEn-age" class="text-sm font-extrabold text-slate-900 mt-1.5 leading-snug"></p>
-              <p id="textKo-age" class="text-xs text-slate-600 mt-1 font-medium"></p>
-            </div>
+        <!-- Outcome Box -->
+        <div id="outcomeBox" class="rounded-xl p-4 border">
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-xs font-bold uppercase tracking-wider opacity-80">Result for Your Persona</span>
+            <span id="sitDelta" class="text-sm font-extrabold px-2.5 py-0.5 rounded-full"></span>
           </div>
-
-          <!-- 카드 2: 성별 -->
-          <div class="card-box h-36 cursor-pointer select-none" onclick="flipSingleCard('gender')">
-            <div id="front-gender" class="card-face w-full h-full bg-indigo-50 border-2 border-dashed border-indigo-300 hover:border-indigo-500 hover:bg-indigo-100/60 rounded-2xl flex flex-col items-center justify-center p-3 shadow-sm">
-              <span class="text-3xl mb-1.5">⚧️</span>
-              <span class="text-sm font-bold text-indigo-900">Gender (성별)</span>
-              <span class="text-xs text-indigo-600 font-semibold mt-1.5 bg-indigo-100 px-2.5 py-0.5 rounded-full">Tap to Draw</span>
-            </div>
-            <div id="back-gender" class="card-face hidden w-full h-full bg-white border-2 border-indigo-500 rounded-2xl flex flex-col items-center justify-center p-2.5 text-center shadow-md pop-in">
-              <span class="text-xs font-extrabold text-indigo-600 uppercase tracking-wider">Gender (성별)</span>
-              <p id="textEn-gender" class="text-sm font-extrabold text-slate-900 mt-1.5 leading-snug"></p>
-              <p id="textKo-gender" class="text-xs text-slate-600 mt-1 font-medium"></p>
-            </div>
-          </div>
-
-          <!-- 카드 3: 이주배경/출신 -->
-          <div class="card-box h-36 cursor-pointer select-none" onclick="flipSingleCard('background')">
-            <div id="front-background" class="card-face w-full h-full bg-indigo-50 border-2 border-dashed border-indigo-300 hover:border-indigo-500 hover:bg-indigo-100/60 rounded-2xl flex flex-col items-center justify-center p-3 shadow-sm">
-              <span class="text-3xl mb-1.5">🌐</span>
-              <span class="text-sm font-bold text-indigo-900">Origin (배경)</span>
-              <span class="text-xs text-indigo-600 font-semibold mt-1.5 bg-indigo-100 px-2.5 py-0.5 rounded-full">Tap to Draw</span>
-            </div>
-            <div id="back-background" class="card-face hidden w-full h-full bg-white border-2 border-indigo-500 rounded-2xl flex flex-col items-center justify-center p-2.5 text-center shadow-md pop-in">
-              <span class="text-xs font-extrabold text-indigo-600 uppercase tracking-wider">Origin (출신)</span>
-              <p id="textEn-background" class="text-sm font-extrabold text-slate-900 mt-1.5 leading-snug"></p>
-              <p id="textKo-background" class="text-xs text-slate-600 mt-1 font-medium"></p>
-            </div>
-          </div>
-
-          <!-- 카드 4: 경제력 -->
-          <div class="card-box h-36 cursor-pointer select-none" onclick="flipSingleCard('wealth')">
-            <div id="front-wealth" class="card-face w-full h-full bg-indigo-50 border-2 border-dashed border-indigo-300 hover:border-indigo-500 hover:bg-indigo-100/60 rounded-2xl flex flex-col items-center justify-center p-3 shadow-sm">
-              <span class="text-3xl mb-1.5">💰</span>
-              <span class="text-sm font-bold text-indigo-900">Wealth (경제력)</span>
-              <span class="text-xs text-indigo-600 font-semibold mt-1.5 bg-indigo-100 px-2.5 py-0.5 rounded-full">Tap to Draw</span>
-            </div>
-            <div id="back-wealth" class="card-face hidden w-full h-full bg-white border-2 border-indigo-500 rounded-2xl flex flex-col items-center justify-center p-2.5 text-center shadow-md pop-in">
-              <span class="text-xs font-extrabold text-indigo-600 uppercase tracking-wider">Wealth (경제력)</span>
-              <p id="textEn-wealth" class="text-sm font-extrabold text-slate-900 mt-1.5 leading-snug"></p>
-              <p id="textKo-wealth" class="text-xs text-slate-600 mt-1 font-medium"></p>
-            </div>
-          </div>
-
-          <!-- 카드 5: 건강 및 장애 -->
-          <div class="card-box h-36 cursor-pointer select-none" onclick="flipSingleCard('disability')">
-            <div id="front-disability" class="card-face w-full h-full bg-indigo-50 border-2 border-dashed border-indigo-300 hover:border-indigo-500 hover:bg-indigo-100/60 rounded-2xl flex flex-col items-center justify-center p-3 shadow-sm">
-              <span class="text-3xl mb-1.5">♿</span>
-              <span class="text-sm font-bold text-indigo-900">Health (건강)</span>
-              <span class="text-xs text-indigo-600 font-semibold mt-1.5 bg-indigo-100 px-2.5 py-0.5 rounded-full">Tap to Draw</span>
-            </div>
-            <div id="back-disability" class="card-face hidden w-full h-full bg-white border-2 border-indigo-500 rounded-2xl flex flex-col items-center justify-center p-2.5 text-center shadow-md pop-in">
-              <span class="text-xs font-extrabold text-indigo-600 uppercase tracking-wider">Health (건강/장애)</span>
-              <p id="textEn-disability" class="text-sm font-extrabold text-slate-900 mt-1.5 leading-snug"></p>
-              <p id="textKo-disability" class="text-xs text-slate-600 mt-1 font-medium"></p>
-            </div>
-          </div>
-
-          <!-- 카드 6: 주거 환경 -->
-          <div class="card-box h-36 cursor-pointer select-none" onclick="flipSingleCard('housing')">
-            <div id="front-housing" class="card-face w-full h-full bg-indigo-50 border-2 border-dashed border-indigo-300 hover:border-indigo-500 hover:bg-indigo-100/60 rounded-2xl flex flex-col items-center justify-center p-3 shadow-sm">
-              <span class="text-3xl mb-1.5">🏡</span>
-              <span class="text-sm font-bold text-indigo-900">Housing (주거)</span>
-              <span class="text-xs text-indigo-600 font-semibold mt-1.5 bg-indigo-100 px-2.5 py-0.5 rounded-full">Tap to Draw</span>
-            </div>
-            <div id="back-housing" class="card-face hidden w-full h-full bg-white border-2 border-indigo-500 rounded-2xl flex flex-col items-center justify-center p-2.5 text-center shadow-md pop-in">
-              <span class="text-xs font-extrabold text-indigo-600 uppercase tracking-wider">Housing (주거환경)</span>
-              <p id="textEn-housing" class="text-sm font-extrabold text-slate-900 mt-1.5 leading-snug"></p>
-              <p id="textKo-housing" class="text-xs text-slate-600 mt-1 font-medium"></p>
-            </div>
-          </div>
-
-        </div>
-
-        <!-- 하단 버튼 영역 -->
-        <div class="space-y-2.5 pt-2">
-          <button onclick="revealAllCardsRandomly()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3.5 rounded-xl text-sm transition duration-150 flex items-center justify-center gap-2 shadow">
-            <span>🎲</span> Spin All Randomly (한 번에 모두 뽑기)
-          </button>
-          <button id="startSimBtn" disabled onclick="enterSimulationWorld()" class="w-full bg-slate-300 text-slate-500 font-bold py-3.5 rounded-xl text-sm transition duration-200 shadow cursor-not-allowed">
-            Reveal All 6 Cards to Start (6개를 모두 뽑아야 시작됩니다)
-          </button>
+          <p id="sitDescEn" class="text-sm sm:text-base font-bold text-white mb-1"></p>
+          <p id="sitDescKo" class="text-xs sm:text-sm text-slate-200/90"></p>
         </div>
       </div>
 
-      <!-- ================= 2단계: 상황 시뮬레이션 진행 화면 ================= -->
-      <div id="simScreen" class="hidden space-y-4">
-        
-        <!-- 내 페르소나 상단 고정 요약 바 -->
-        <div class="bg-indigo-50/90 border border-indigo-200 rounded-xl p-3.5 text-xs text-slate-700 shadow-sm">
-          <div class="font-bold text-indigo-900 mb-2 flex items-center justify-between border-b border-indigo-200/70 pb-1.5 text-sm">
-            <span>👤 My Drawn Persona (나의 확정된 신분)</span>
-            <span class="text-xs bg-indigo-600 text-white px-2.5 py-0.5 rounded-full font-bold">Active</span>
-          </div>
-          <div id="personaSummaryBar" class="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-1.5 text-xs sm:text-sm text-slate-800"></div>
+      <button id="nextSitBtn" onclick="nextSituation()"
+        class="w-full bg-indigo-600 hover:bg-indigo-500 active:scale-95 transition text-white font-bold py-3.5 rounded-2xl text-base">
+        다음 상황 보기 (Next Situation) &rarr;
+      </button>
+    </section>
+
+    <!-- SCREEN 3: FINAL SUMMARY & REVIEW MY 8 SITUATIONS -->
+    <section id="screenResult" class="hidden p-6 sm:p-8 card-pop">
+      <div class="text-center mb-6">
+        <span class="inline-block bg-emerald-500/20 text-emerald-300 text-xs font-bold px-3 py-1 rounded-full mb-2">
+          Simulation Complete!
+        </span>
+        <h2 class="text-2xl font-extrabold text-white">최종 결과 요약 (Final Summary)</h2>
+        <p class="text-xs text-slate-400 mt-1">아래 결과를 학습지 Part 3에 간단히 표시하고 짝과 비교해 보세요!</p>
+      </div>
+
+      <!-- Score & Status Card -->
+      <div class="grid grid-cols-2 gap-3 mb-4">
+        <div class="bg-slate-800/90 border border-slate-700 rounded-2xl p-4 text-center">
+          <div class="text-xs text-slate-400 mb-1">Final Score (최종 점수)</div>
+          <div id="finalScoreDisplay" class="text-3xl font-extrabold text-white">100 pts</div>
         </div>
-
-        <!-- 상황 진행 카드 -->
-        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
-          <div class="mb-2">
-            <span id="stepBadge" class="inline-block text-xs font-bold bg-indigo-100 px-2.5 py-1 rounded-md text-indigo-700 mb-1.5"></span>
-            <h3 id="eventTitle" class="text-base sm:text-lg font-extrabold text-slate-900 leading-snug"></h3>
-          </div>
-          <p id="eventTitleKo" class="text-sm font-semibold text-slate-600 mb-3"></p>
-          
-          <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/80 mb-4 leading-relaxed">
-            <p id="eventDesc" class="text-sm sm:text-base font-semibold text-slate-800"></p>
-            <p id="eventDescKo" class="text-slate-600 mt-1.5 text-xs sm:text-sm"></p>
-          </div>
-
-          <!-- 판정 결과 박스 -->
-          <div id="resultBox" class="hidden p-4 rounded-xl leading-relaxed transition-all mb-4">
-            <p id="resultEn" class="text-sm sm:text-base font-extrabold"></p>
-            <p id="resultKo" class="text-xs sm:text-sm mt-1.5 opacity-95 font-medium"></p>
-          </div>
-
-          <!-- 조작 버튼 영역 -->
-          <div class="flex gap-2.5">
-            <button id="prevBtn" onclick="prevEvent()" class="hidden w-1/3 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-3 rounded-xl text-xs sm:text-sm transition shadow-sm leading-tight">
-              ← Previous<br><span class="text-xs font-normal">(이전 상황)</span>
-            </button>
-            <button id="resolveBtn" onclick="resolveEvent()" class="flex-1 bg-slate-900 hover:bg-black text-white font-bold py-3.5 rounded-xl text-sm sm:text-base transition shadow">
-              Check the Outcome (결과 확인하기)
-            </button>
-            <button id="nextBtn" onclick="nextEvent()" class="hidden flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl text-sm sm:text-base transition shadow">
-              Next Situation (다음 상황) ➔
-            </button>
-          </div>
+        <div id="statusCard" class="border rounded-2xl p-4 text-center flex flex-col justify-center">
+          <div class="text-xs opacity-80 mb-1">Final Status (최종 등급)</div>
+          <div id="finalStatusDisplay" class="text-xl sm:text-2xl font-extrabold">Stable</div>
         </div>
       </div>
 
-      <!-- ================= 3단계: 최종 결과 & 성찰 ================= -->
-      <div id="endScreen" class="hidden space-y-4">
-        <div class="text-center py-2">
-          <div class="text-5xl mb-1.5">🏁</div>
-          <h2 class="text-xl font-extrabold text-slate-900">Simulation Complete</h2>
-          <p class="text-sm text-slate-500">최종 결과 및 성찰</p>
-          <div id="finalScore" class="text-4xl font-black text-indigo-600 mt-2"></div>
-          <p id="finalStatus" class="text-sm sm:text-base font-bold mt-1.5"></p>
+      <!-- Hardest Barrier Highlight -->
+      <div class="bg-rose-950/50 border border-rose-500/40 rounded-2xl p-4 mb-6">
+        <div class="text-xs font-bold text-rose-300 uppercase tracking-wider mb-1">
+          ⚠️ The Hardest Barrier (가장 힘들었던 위기 1가지)
         </div>
-
-        <!-- 전체 기록 다시보기 토글 버튼 & 요약 영역 -->
-        <div class="bg-white border-2 border-indigo-100 rounded-2xl p-4 shadow-sm">
-          <button onclick="toggleSummaryLog()" class="w-full flex items-center justify-between text-sm font-extrabold text-indigo-700 py-1">
-            <span>📋 Review My 8 Situations (학습지 기록용 전체 결과)</span>
-            <span id="toggleArrow" class="text-base">▼</span>
-          </button>
-          <div id="fullHistoryLog" class="hidden mt-3 pt-3 border-t border-slate-100 space-y-2.5 max-h-72 overflow-y-auto text-xs sm:text-sm">
-            <!-- JS로 자동 생성 -->
-          </div>
-        </div>
-
-        <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 space-y-3.5">
-          <h4 class="text-sm sm:text-base font-extrabold text-amber-900 flex items-center gap-1.5">
-            <span>💡</span> Reflective Questions (생각해볼 점):
-          </h4>
-          <div class="space-y-3">
-            <div>
-              <p class="text-sm font-bold text-slate-800">1. Personal Effort vs. Luck?</p>
-              <p class="text-xs sm:text-sm text-slate-700 mt-0.5">당신이 점수를 얻거나 잃은 것은 개인의 노력 때문이었나요, 아니면 처음 뽑은 운 때문이었나요?</p>
-            </div>
-            <div>
-              <p class="text-sm font-bold text-slate-800">2. The Hardest Barrier?</p>
-              <p class="text-xs sm:text-sm text-slate-700 mt-0.5">당신의 페르소나에게 가장 극복하기 힘들었던 사회적 장벽(주거, 교통, 의료, 교육, 고용 등)은 무엇이었나요?</p>
-            </div>
-            <div>
-              <p class="text-sm font-bold text-slate-800">3. Policy Behind the Veil?</p>
-              <p class="text-xs sm:text-sm text-slate-700 mt-0.5">만약 태어나기 전 사회 제도를 정할 수 있다면, 어떤 최소 안전망을 가장 먼저 만들겠습니까?</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="flex gap-2.5">
-          <button onclick="backToLastSituation()" class="w-1/3 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-3.5 rounded-xl text-xs sm:text-sm transition">
-            ← Back (이전으로)
-          </button>
-          <button onclick="resetAll()" class="flex-1 bg-slate-800 hover:bg-slate-900 text-white font-bold py-3.5 rounded-xl text-sm transition">
-            🔄 Draw New Cards (다시 뽑기)
-          </button>
-        </div>
+        <div id="hardestBarrierText" class="text-sm sm:text-base font-bold text-white"></div>
       </div>
 
-    </div>
+      <!-- Review My 8 Situations -->
+      <div class="mb-6">
+        <h3 class="text-sm font-bold text-indigo-300 mb-3 flex items-center justify-between">
+          <span>📋 Review My 8 Situations (8가지 위기 전체 기록)</span>
+          <span class="text-xs font-normal text-slate-400">짝에게 이 화면을 보여주세요</span>
+        </h3>
+        <div id="reviewList" class="space-y-2.5 max-h-72 overflow-y-auto pr-1"></div>
+      </div>
+
+      <button onclick="resetGame()"
+        class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 font-bold py-3 rounded-2xl text-sm transition">
+        🔄 새로운 신분으로 다시 체험하기 (Try Another Identity)
+      </button>
+    </section>
   </div>
 
   <script>
-    const attributes = {
+    const OPTIONS = {
       age: [
-        { id: "teen", en: "16 yrs (Student)", ko: "16세 (청소년/학생)" },
-        { id: "job_seeker", en: "26 yrs (Job Seeker)", ko: "26세 (청년 구직자)" },
-        { id: "middle_aged", en: "48 yrs (Breadwinner)", ko: "48세 (중장년 가장)" },
-        { id: "elderly", en: "74 yrs (Living Alone)", ko: "74세 (독거노인)" }
+        { id: 'teen', labelKo: '16세 고등학생', labelEn: '16yo Teen', icon: '🎒' },
+        { id: 'young', labelKo: '28세 사회초년생', labelEn: '28yo Young Adult', icon: '💼' },
+        { id: 'middle', labelKo: '45세 직장인·부모', labelEn: '45yo Parent', icon: '🧑‍💼' },
+        { id: 'elderly', labelKo: '74세 독거노인', labelEn: '74yo Senior Alone', icon: '🦯' }
       ],
       gender: [
-        { id: "female", en: "Female", ko: "여성" },
-        { id: "male", en: "Male", ko: "남성" }
+        { id: 'male', labelKo: '남성', labelEn: 'Male', icon: '👨' },
+        { id: 'female', labelKo: '여성', labelEn: 'Female', icon: '👩' }
       ],
-      background: [
-        { id: "native", en: "Native Citizen", ko: "내국인" },
-        { id: "multicultural", en: "Multicultural Youth", ko: "다문화가정 자녀" },
-        { id: "migrant_worker", en: "Foreign Worker", ko: "외국인 노동자 (단기비자)" },
-        { id: "refugee", en: "Refugee Applicant", ko: "난민 신청자" }
+      origin: [
+        { id: 'native', labelKo: '내국인', labelEn: 'Local Citizen', icon: '🇰🇷' },
+        { id: 'multicultural', labelKo: '다문화 가정', labelEn: 'Multicultural', icon: '🌏' },
+        { id: 'migrant', labelKo: '외국인 근로자', labelEn: 'Migrant Worker', icon: '🛂' },
+        { id: 'refugee', labelKo: '난민 신청자', labelEn: 'Refugee Applicant', icon: '🕊️' }
       ],
       wealth: [
-        { id: "low", en: "Low Income Recipient", ko: "기초생활수급자 (저소득)" },
-        { id: "middle", en: "Middle Income", ko: "중위소득층 (평범한 가구)" },
-        { id: "high", en: "Top 10% High Income", ko: "상위 10% 고소득층" }
+        { id: 'high', labelKo: '상위 10% 고소득', labelEn: 'Top 10% High Income', icon: '💎' },
+        { id: 'middle', labelKo: '중위소득 보통', labelEn: 'Middle Income', icon: '💳' },
+        { id: 'low', labelKo: '기초수급·저소득', labelEn: 'Low Income', icon: '🪙' }
       ],
-      disability: [
-        { id: "none", en: "Non-disabled", ko: "비장애인" },
-        { id: "wheelchair", en: "Wheelchair User", ko: "휠체어 이용자 (지체장애)" },
-        { id: "visual", en: "Visually Impaired", ko: "시각장애인" },
-        { id: "neurodivergent", en: "Neurodivergent", ko: "발달장애/신경다양인" }
+      health: [
+        { id: 'healthy', labelKo: '건강함·비장애', labelEn: 'Healthy', icon: '💪' },
+        { id: 'wheelchair', labelKo: '지체장애·휠체어', labelEn: 'Wheelchair User', icon: '♿' },
+        { id: 'visual', labelKo: '시각장애', labelEn: 'Visual Impairment', icon: '🕶️' },
+        { id: 'chronic', labelKo: '만성·희귀질환', labelEn: 'Chronic Illness', icon: '🩺' }
       ],
       housing: [
-        { id: "modern_apt", en: "Modern Apartment", ko: "역세권 신축 아파트" },
-        { id: "semi_basement", en: "Semi-basement Room", ko: "침수 위험 반지하방" },
-        { id: "rural", en: "Isolated Rural House", ko: "대중교통 없는 노후주택" }
+        { id: 'apt', labelKo: '도심 신축 아파트', labelEn: 'Modern City Apt', icon: '🏢' },
+        { id: 'rural', labelKo: '노후 농촌 주택', labelEn: 'Old Rural House', icon: '🏡' },
+        { id: 'semi', labelKo: '반지하 원룸', labelEn: 'Semi-basement', icon: '🏚️' }
       ]
     };
 
-    const events = [
-      {
-        titleEn: "Situation 1: Extreme Heavy Rainfall",
-        titleKo: "상황 1: 기록적인 폭우와 침수 (SDG 11 & 13)",
-        descEn: "A record storm hits your town. Flood water starts pouring into residential areas.",
-        descKo: "기록적인 폭우가 마을을 덮쳐 주택가로 빗물이 들이치기 시작합니다.",
-        resolve: (p) => {
-          if (p.housing.id === "semi_basement" || p.wealth.id === "low") {
-            return { score: -20, en: "Your room was flooded. Emergency repair cost is devastating. (-20 pts)", ko: "방이 침수되어 막대한 복구 비용과 함께 일상이 마비되었습니다. (-20점)", neg: true };
-          } else if (p.wealth.id === "high") {
-            return { score: 0, en: "Modern drainage and flood walls kept you safe. (0 pts)", ko: "최신 차수벽과 배수 시스템 덕분에 아무 피해가 없었습니다. (0점)", neg: false };
-          }
-          return { score: -5, en: "Temporary blackout caused minor inconveniences. (-5 pts)", ko: "일시적인 정전으로 약간의 불편을 겪었습니다. (-5점)", neg: true };
-        }
-      },
-      {
-        titleEn: "Situation 2: Public Transportation",
-        titleKo: "상황 2: 대중교통을 이용한 이동 (SDG 10 & 11)",
-        descEn: "You have an urgent appointment across the city during rush hour.",
-        descKo: "출근 시간대에 도시 반대편으로 긴급하게 이동해야 합니다.",
-        resolve: (p) => {
-          if (p.disability.id === "wheelchair") {
-            return { score: -15, en: "The station lift was broken. You were late for 1 hour. (-15 pts)", ko: "지하철 리프트가 고장 나 약속에 1시간 지각했습니다. (-15점)", neg: true };
-          } else if (p.housing.id === "rural") {
-            return { score: -10, en: "Buses only run twice a day. You waited 2 hours. (-10 pts)", ko: "버스가 하루 두 번만 다녀 정류장에서 2시간을 기다렸습니다. (-10점)", neg: true };
-          }
-          return { score: +5, en: "Arrived on time using the seamless transit transfer! (+5 pts)", ko: "편리한 대중교통 환승으로 제시간에 도착했습니다! (+5점)", neg: false };
-        }
-      },
-      {
-        titleEn: "Situation 3: Emergency Relief Application",
-        titleKo: "상황 3: 긴급 재난지원금 신청 (SDG 1 & 10)",
-        descEn: "Government relief is provided, but requires online Korean identity auth.",
-        descKo: "정부 지원금이 지급되지만, 한국어 온라인 본인 인증으로만 진행됩니다.",
-        resolve: (p) => {
-          if (p.background.id === "refugee" || p.background.id === "migrant_worker") {
-            return { score: -15, en: "Language barriers and strict visa status blocked you. (-15 pts)", ko: "언어 장벽과 비자 제한으로 지원 대상에서 배제되었습니다. (-15점)", neg: true };
-          } else if (p.age.id === "elderly" || p.disability.id === "visual") {
-            return { score: -10, en: "Complex digital screens made it impossible to apply alone. (-10 pts)", ko: "복잡한 모바일 인증 절차 때문에 신청을 포기했습니다. (-10점)", neg: true };
-          }
-          return { score: +10, en: "You received the funds safely via simple mobile auth. (+10 pts)", ko: "모바일 간편인증으로 지원금을 무사히 수령했습니다. (+10점)", neg: false };
-        }
-      },
-      {
-        titleEn: "Situation 4: Sudden Emergency Illness",
-        titleKo: "상황 4: 야간 응급 진료 (SDG 3 건강과 복지)",
-        descEn: "You suffer from severe high fever at midnight and need urgent hospital care.",
-        descKo: "한밤중에 심한 고열이 발생해 긴급하게 병원 진료가 필요합니다.",
-        resolve: (p) => {
-          if (p.wealth.id === "low") {
-            return { score: -15, en: "You hesitated to call 119 fearing medical bills. (-15 pts)", ko: "병원비 부담 때문에 구급차를 부르지 못하고 참았습니다. (-15점)", neg: true };
-          } else if (p.housing.id === "rural") {
-            return { score: -15, en: "No emergency room nearby. It took 90 minutes to find a doctor. (-15 pts)", ko: "인근에 응급실이 없어 병원 이송에 90분이 걸렸습니다. (-15점)", neg: true };
-          }
-          return { score: +5, en: "Treated promptly at a general hospital 10 mins away. (+5 pts)", ko: "10분 거리의 종합병원에서 신속하게 치료받았습니다. (+5점)", neg: false };
-        }
-      },
-      {
-        titleEn: "Situation 5: Digital Learning & School Exam",
-        titleKo: "상황 5: 디지털 학습과 학교 시험 (SDG 4 양질의 교육)",
-        descEn: "School introduces high-tech AI online learning materials and digital mock exams.",
-        descKo: "학교에서 최신 AI 온라인 학습 자료와 디지털 모의고사를 도입했습니다.",
-        resolve: (p) => {
-          if (p.wealth.id === "high") {
-            return { score: +15, en: "Equipped with high-end tablet and private AI tutoring! (+15 pts)", ko: "최신 태블릿과 맞춤형 AI 과외를 지원받아 성적이 올랐습니다! (+15점)", neg: false };
-          } else if (p.wealth.id === "low" || p.background.id === "multicultural") {
-            return { score: -10, en: "Lacked personal digital devices and suffered from learning gaps. (-10 pts)", ko: "개인 스마트 기기 부재와 정보 격차로 학습에 어려움을 겪었습니다. (-10점)", neg: true };
-          } else if (p.disability.id === "neurodivergent" || p.disability.id === "visual") {
-            return { score: -10, en: "Digital learning platforms lacked barrier-free accessibility. (-10 pts)", ko: "학습 플랫폼의 배리어프리 미지원으로 접근이 어려웠습니다. (-10점)", neg: true };
-          }
-          return { score: +5, en: "Studied steadily using public school computer labs. (+5 pts)", ko: "학교 컴퓨터실을 이용해 무난하게 학습을 마쳤습니다. (+5점)", neg: false };
-        }
-      },
-      {
-        titleEn: "Situation 6: Job Interview & Fair Hiring",
-        titleKo: "상황 6: 취업 면접과 공정한 채용 (SDG 8 양질의 일자리)",
-        descEn: "You apply for a stable job and attend an in-person final interview.",
-        descKo: "안정적인 정규직 일자리에 지원하여 최종 대면 면접에 참여합니다.",
-        resolve: (p) => {
-          if (p.background.id === "refugee" || p.background.id === "migrant_worker") {
-            return { score: -15, en: "Visa restrictions and social prejudice blocked hiring. (-15 pts)", ko: "비자 규제와 편견의 벽에 부딪혀 채용에서 탈락했습니다. (-15점)", neg: true };
-          } else if (p.gender.id === "female" && (p.age.id === "job_seeker" || p.age.id === "middle_aged")) {
-            return { score: -10, en: "Faced unfair questions about marriage and childcare during interview. (-10 pts)", ko: "면접에서 결혼과 육아에 대한 불공정한 질문을 받았습니다. (-10점)", neg: true };
-          } else if (p.disability.id === "wheelchair") {
-            return { score: -10, en: "The company building lacked accessible ramps and elevators. (-10 pts)", ko: "회사 건물에 경사로와 엘리베이터가 없어 면접장에 가기 힘들었습니다. (-10점)", neg: true };
-          }
-          return { score: +10, en: "Successfully passed the interview based purely on skills! (+10 pts)", ko: "직무 역량을 인정받아 성공적으로 합격했습니다! (+10점)", neg: false };
-        }
-      },
-      {
-        titleEn: "Situation 7: K-Culture Concert & Leisure",
-        titleKo: "상황 7: 문화생활과 여가 활동 (SDG 10 불평등 완화)",
-        descEn: "A major cultural festival and concert take place downtown this weekend.",
-        descKo: "이번 주말 도심에서 대규모 문화 축제와 콘서트가 열립니다.",
-        resolve: (p) => {
-          if (p.disability.id === "wheelchair" || p.disability.id === "visual") {
-            return { score: -10, en: "Lacked wheelchair viewing seats and sign language/braille info. (-10 pts)", ko: "휠체어 전용 관람석과 점자/수어 안내가 없어 관람을 포기했습니다. (-10점)", neg: true };
-          } else if (p.housing.id === "rural") {
-            return { score: -10, en: "No late-night transport back home; you could not attend. (-10 pts)", ko: "외곽 지역으로 가는 심야 대중교통이 없어 참석하지 못했습니다. (-10점)", neg: true };
-          } else if (p.wealth.id === "high") {
-            return { score: +10, en: "Enjoyed VIP seats and cultural leisure comfortably! (+10 pts)", ko: "좋은 좌석에서 풍부한 문화생활을 즐겼습니다! (+10점)", neg: false };
-          }
-          return { score: +5, en: "Enjoyed the public festival with friends on a budget. (+5 pts)", ko: "친구들과 함께 부담 없는 가격으로 축제를 즐겼습니다. (+5점)", neg: false };
-        }
-      },
-      {
-        titleEn: "Situation 8: Heatwave & Electricity Bills",
-        titleKo: "상황 8: 폭염과 에너지 비용 (SDG 7 & 13)",
-        descEn: "A deadly 38°C heatwave continues for weeks. Running the AC is vital for survival.",
-        descKo: "38도에 달하는 폭염이 몇 주간 지속되어 에어컨 가동이 필수가 되었습니다.",
-        resolve: (p) => {
-          if (p.housing.id === "semi_basement" || p.wealth.id === "low") {
-            return { score: -15, en: "Poor ventilation and scary electricity bills caused heat illness. (-15 pts)", ko: "환기가 안 되는 환경과 전기료 부담으로 온열질환에 걸렸습니다. (-15점)", neg: true };
-          } else if (p.age.id === "elderly") {
-            return { score: -10, en: "Suffered alone in heat without proper cooling assistance. (-10 pts)", ko: "냉방 복지 혜택을 제때 받지 못해 홀로 더위를 견뎌야 했습니다. (-10점)", neg: true };
-          } else if (p.wealth.id === "high") {
-            return { score: 0, en: "Smart eco-cooling kept your home fresh without financial stress. (0 pts)", ko: "스마트 냉방 시스템 덕분에 비용 걱정 없이 쾌적하게 보냈습니다. (0점)", neg: false };
-          }
-          return { score: -5, en: "Electricity bills weighed on your monthly budget. (-5 pts)", ko: "전기요금 인상으로 생활비 지출이 늘어났습니다. (-5점)", neg: true };
-        }
-      }
-    ];
-
-    let myPersona = {
-      age: null,
-      gender: null,
-      background: null,
-      wealth: null,
-      disability: null,
-      housing: null
+    const CATEGORY_NAMES = {
+      age: '나이 (Age)',
+      gender: '성별 (Gender)',
+      origin: '출신 (Origin)',
+      wealth: '경제력 (Wealth)',
+      health: '건강 (Health)',
+      housing: '주거 (Housing)'
     };
 
-    let score = 50;
-    let currentStep = 0;
-    let stepHistory = new Array(events.length).fill(null);
+    let persona = {};
+    let score = 100;
+    let stepIndex = 0;
+    let historyLog = [];
 
-    function getRandomItem(arr) {
+    function pickRandom(arr) {
       return arr[Math.floor(Math.random() * arr.length)];
     }
 
-    function flipSingleCard(type) {
-      if (myPersona[type] !== null) return;
+    function drawIdentity() {
+      persona = {
+        age: pickRandom(OPTIONS.age),
+        gender: pickRandom(OPTIONS.gender),
+        origin: pickRandom(OPTIONS.origin),
+        wealth: pickRandom(OPTIONS.wealth),
+        health: pickRandom(OPTIONS.health),
+        housing: pickRandom(OPTIONS.housing)
+      };
 
-      const chosen = getRandomItem(attributes[type]);
-      myPersona[type] = chosen;
+      const grid = document.getElementById('identityGrid');
+      grid.innerHTML = '';
+      grid.classList.remove('hidden');
+      grid.classList.add('grid');
 
-      document.getElementById(`textEn-${type}`).innerText = chosen.en;
-      document.getElementById(`textKo-${type}`).innerText = chosen.ko;
-
-      document.getElementById(`front-${type}`).classList.add("hidden");
-      document.getElementById(`back-${type}`).classList.remove("hidden");
-
-      checkAllFlipped();
-    }
-
-    function revealAllCardsRandomly() {
-      Object.keys(attributes).forEach((type, idx) => {
-        setTimeout(() => {
-          if (myPersona[type] === null) {
-            flipSingleCard(type);
-          }
-        }, idx * 100);
+      Object.keys(persona).forEach(key => {
+        const item = persona[key];
+        const card = document.createElement('div');
+        card.className = 'bg-slate-800/90 border border-indigo-500/40 rounded-2xl p-3.5 card-pop';
+        card.innerHTML = `
+          <div class="text-[11px] text-indigo-300 font-semibold mb-1">${CATEGORY_NAMES[key]}</div>
+          <div class="text-base font-extrabold text-white flex items-center gap-1.5">
+            <span>${item.icon}</span>
+            <span>${item.labelKo}</span>
+          </div>
+          <div class="text-xs text-slate-400 mt-0.5">${item.labelEn}</div>
+        `;
+        grid.appendChild(card);
       });
+
+      document.getElementById('drawBtn').textContent = '🔄 다시 뽑기 (Re-draw)';
+      document.getElementById('drawBtn').className =
+        'w-full sm:w-auto bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 font-bold px-6 py-3 rounded-2xl text-sm mr-0 sm:mr-2 mb-2 sm:mb-0';
+      document.getElementById('startSimBtn').classList.remove('hidden');
     }
 
-    function checkAllFlipped() {
-      const allReady = Object.values(myPersona).every(val => val !== null);
-      const btn = document.getElementById("startSimBtn");
-      if (allReady) {
-        btn.disabled = false;
-        btn.className = "w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-black py-3.5 rounded-xl text-sm transition duration-200 shadow-lg pulse-glow cursor-pointer";
-        btn.innerHTML = "Enter the World with this Identity ➔<br><span class='text-xs font-normal'>(이 신분으로 세상에 들어가기)</span>";
-      }
+    // 8 Situations with strict logical consistency across all persona attributes
+    function evaluateSituations(p) {
+      return [
+        // 1. Heavy Rainfall (checks housing first!)
+        (() => {
+          let delta = 0, en = '', ko = '';
+          if (p.housing.id === 'semi') {
+            delta = -15;
+            en = 'Rainwater flooded into your semi-basement room, damaging your electronics and bedding.';
+            ko = '반지하 방으로 빗물이 역류해 가전제품과 이불이 모두 젖고 큰 재산 피해를 입었습니다.';
+          } else if (p.housing.id === 'rural') {
+            delta = -10;
+            en = 'Your old rural house suffered roof leaks and overflowing ditches, requiring costly repairs.';
+            ko = '노후 농촌 주택의 지붕이 새고 배수로가 넘쳐 집안이 침수되고 수리비가 크게 들었습니다.';
+          } else if (p.wealth.id === 'low') {
+            delta = -5;
+            en = 'Your apartment stayed dry, but flooded roads stopped buses and cost you a day of hourly pay.';
+            ko = '신축 아파트는 무사했지만, 도로 침수로 버스가 끊겨 일당제 근무를 못 나가 수입이 줄었습니다.';
+          } else {
+            delta = 5;
+            en = 'Modern drainage and flood walls in your new city apartment kept you completely safe.';
+            ko = '도심 신축 아파트의 최신 배수 시스템과 차수벽 덕분에 폭우 속에서도 안전하게 지냈습니다.';
+          }
+          return {
+            icon: '🌧️',
+            titleEn: '1. Heavy Rainfall & Flooding',
+            titleKo: '기록적인 집중호우가 쏟아졌습니다.',
+            prompt: '밤사이 시간당 80mm의 폭우가 내렸습니다. 당신의 주거 환경은 안전할까요?',
+            delta, en, ko
+          };
+        })(),
+
+        // 2. Public Transit (checks health, age, housing)
+        (() => {
+          let delta = 0, en = '', ko = '';
+          if (p.health.id === 'wheelchair') {
+            delta = -15;
+            en = 'The subway elevator was out of order, leaving you stranded before steep stairs.';
+            ko = '지하철역 엘리베이터가 고장 나 계단 앞에서 발이 묶였고, 저상버스를 한참 기다려 지각했습니다.';
+          } else if (p.health.id === 'visual') {
+            delta = -10;
+            en = 'Construction blocked the tactile paving, and broken voice guidance made your commute unsafe.';
+            ko = '보도블록 공사로 점자블록이 끊기고 음성 안내가 작동하지 않아 이동 중 큰 위험을 겪었습니다.';
+          } else if (p.age.id === 'elderly' || p.housing.id === 'rural') {
+            delta = -8;
+            en = 'Long rural bus intervals and steep transfer stairs made your morning trip exhausting.';
+            ko = '배차 간격이 긴 노선과 가파른 환승 계단 때문에 이동하는 데 큰 체력과 시간이 들었습니다.';
+          } else {
+            delta = 5;
+            en = 'You transferred smoothly between subway and bus and arrived right on time.';
+            ko = '집 근처 지하철과 버스를 막힘없이 환승해 여유 있게 제시간에 도착했습니다.';
+          }
+          return {
+            icon: '🚌',
+            titleEn: '2. Morning Commute & Transit',
+            titleKo: '바쁜 아침, 대중교통으로 이동해야 합니다.',
+            prompt: '중요한 약속 시간에 맞춰 대중교통을 타고 이동하는 길입니다.',
+            delta, en, ko
+          };
+        })(),
+
+        // 3. Emergency Relief Application (checks origin, age, health)
+        (() => {
+          let delta = 0, en = '', ko = '';
+          if (p.origin.id === 'refugee' || p.origin.id === 'migrant') {
+            delta = -15;
+            en = 'Visa restrictions and complex Korean paperwork excluded you from government relief funds.';
+            ko = '체류 자격 제한과 복잡한 한국어 행정 서류 때문에 긴급 재난지원금 대상에서 제외되었습니다.';
+          } else if (p.age.id === 'elderly') {
+            delta = -10;
+            en = 'Mobile identity verification was too complicated, so you missed the online deadline.';
+            ko = '스마트폰 본인인증과 온라인 앱 신청 절차가 너무 어려워 신청 기한을 놓쳤습니다.';
+          } else if (p.health.id === 'visual') {
+            delta = -10;
+            en = 'The online application page lacked screen-reader support, blocking you from applying alone.';
+            ko = '신청 웹사이트가 화면 낭독기(스크린 리더)를 지원하지 않아 혼자 신청할 수 없었습니다.';
+          } else {
+            delta = 10;
+            en = 'You completed mobile verification in 3 minutes and received the support funds quickly.';
+            ko = '스마트폰 앱으로 3분 만에 본인인증을 마치고 지원금을 빠르게 수령했습니다.';
+          }
+          return {
+            icon: '📱',
+            titleEn: '3. Emergency Relief Application',
+            titleKo: '정부가 모바일 앱으로 긴급 지원금을 신청받습니다.',
+            prompt: '온라인 본인인증을 거쳐 생활 안정 지원금을 신청해야 합니다.',
+            delta, en, ko
+          };
+        })(),
+
+        // 4. Midnight Emergency Illness (checks origin, wealth, housing, health)
+        (() => {
+          let delta = 0, en = '', ko = '';
+          if (p.origin.id === 'refugee' || p.origin.id === 'migrant') {
+            delta = -15;
+            en = 'Language barriers and lack of full insurance delayed your midnight emergency treatment.';
+            ko = '언어 장벽과 건강보험 미적용으로 야간 응급실 진료비와 통역 문제에 막혀 치료가 늦어졌습니다.';
+          } else if (p.wealth.id === 'low' || p.housing.id === 'rural') {
+            delta = -12;
+            en = 'High emergency bills and a lack of nearby night hospitals forced you to endure the pain.';
+            ko = '야간 응급실까지 갈 교통편과 비급여 진료비가 부담되어 밤새 통증을 참아야 했습니다.';
+          } else if (p.health.id === 'chronic') {
+            delta = -8;
+            en = 'Because of your chronic illness, the local ER lacked specialists and transferred you late.';
+            ko = '기존 만성질환 때문에 1차 응급실에서 수용이 지연되어 다른 병원으로 이송되었습니다.';
+          } else if (p.wealth.id === 'high') {
+            delta = 5;
+            en = 'You drove to a major hospital ER immediately and covered costs with private insurance.';
+            ko = '자차로 대형병원 응급실에 즉시 이동하고 민간 보험으로 부담 없이 치료받았습니다.';
+          } else {
+            delta = 0;
+            en = 'National health insurance allowed you to receive timely treatment at an affordable cost.';
+            ko = '국민건강보험 덕분에 감당 가능한 비용으로 응급 진료를 받고 무사히 회복했습니다.';
+          }
+          return {
+            icon: '🏥',
+            titleEn: '4. Midnight Medical Emergency',
+            titleKo: '한밤중 갑작스러운 고열과 복통이 찾아왔습니다.',
+            prompt: '새벽 2시, 즉시 응급실에 가야 하는 위급한 상황입니다.',
+            delta, en, ko
+          };
+        })(),
+
+        // 5. Digital Learning & Online Assessment (checks health, wealth, housing, age)
+        (() => {
+          let delta = 0, en = '', ko = '';
+          if (p.health.id === 'visual') {
+            delta = -15;
+            en = 'The digital exam platform lacked audio descriptions, putting you at a severe disadvantage.';
+            ko = '온라인 평가 플랫폼에 음성 지원과 대체 텍스트가 없어 문제를 제대로 읽지 못했습니다.';
+          } else if (p.wealth.id === 'low' || p.housing.id === 'semi' || p.housing.id === 'rural') {
+            delta = -10;
+            en = 'An outdated device and unstable Wi-Fi caused disconnections during your online test.';
+            ko = '구형 기기와 불안정한 와이파이 때문에 화상 수업과 디지털 평가 도중 자꾸 접속이 끊겼습니다.';
+          } else if (p.age.id === 'elderly') {
+            delta = -8;
+            en = 'Unfamiliar digital interfaces made it hard to complete online tasks independently.';
+            ko = '디지털 기기와 온라인 인증 화면이 낯설어 필수 온라인 절차를 혼자 처리하기 어려웠습니다.';
+          } else {
+            delta = 5;
+            en = 'With a fast laptop and high-speed Wi-Fi, you completed your digital work smoothly.';
+            ko = '최신 노트북과 초고속 인터넷 환경에서 자료를 빠르게 찾고 과제를 무사히 마쳤습니다.';
+          }
+          return {
+            icon: '💻',
+            titleEn: '5. Digital Access & Online Test',
+            titleKo: '온라인 플랫폼으로 중요한 과제·평가를 치릅니다.',
+            prompt: '디지털 기기와 안정적인 인터넷 연결이 필수적인 상황입니다.',
+            delta, en, ko
+          };
+        })(),
+
+        // 6. Job & Part-time Opportunity (tailored to age, origin, health, gender, wealth)
+        (() => {
+          let delta = 0, en = '', ko = '';
+          if (p.origin.id === 'refugee' || p.origin.id === 'migrant') {
+            delta = -15;
+            en = 'Work permit restrictions and bias against your background blocked you from getting hired.';
+            ko = '취업 비자 제한과 출신 배경에 대한 편견 때문에 면접 기회조차 얻기 어려웠습니다.';
+          } else if (p.health.id === 'wheelchair' || p.health.id === 'visual' || p.health.id === 'chronic') {
+            delta = -12;
+            en = 'Despite strong skills, you were rejected due to a lack of workplace accessibility.';
+            ko = '직무 능력은 충분했지만 편의시설 부족과 건강 염려를 이유로 채용에서 탈락했습니다.';
+          } else if (p.age.id === 'teen') {
+            delta = -8;
+            en = 'As a teen, you faced unfair part-time contract terms and below-minimum wage offers.';
+            ko = '청소년 아르바이트 자리에서 근로계약서 미작성과 최저임금 미지급 등 불공정한 대우를 겪었습니다.';
+          } else if (p.age.id === 'elderly') {
+            delta = -10;
+            en = 'Because of your age, you were repeatedly rejected even for simple part-time jobs.';
+            ko = '나이가 많다는 이유로 단순 일자리조차 서류 단계에서 번번이 탈락했습니다.';
+          } else if (p.gender.id === 'female' && p.wealth.id !== 'high') {
+            delta = -8;
+            en = 'You faced biased interview questions and a glass ceiling despite equal qualifications.';
+            ko = '면접에서 직무와 무관한 질문을 받으며 보이지 않는 유리천장을 경험했습니다.';
+          } else {
+            delta = 10;
+            en = 'With strong credentials and a fair evaluation process, you successfully got the job.';
+            ko = '안정적인 배경과 우호적인 평가 속에서 원하는 일자리에 최종 합격했습니다.';
+          }
+          return {
+            icon: '🤝',
+            titleEn: '6. Job & Part-Time Opportunity',
+            titleKo: '생계를 위해 새로운 일자리(아르바이트·채용)에 지원합니다.',
+            prompt: '나의 연령과 조건에 맞는 일자리를 구하기 위해 면접에 참여했습니다.',
+            delta, en, ko
+          };
+        })(),
+
+        // 7. Cultural & Leisure Access (checks health, housing, wealth)
+        (() => {
+          let delta = 0, en = '', ko = '';
+          if (p.health.id === 'wheelchair' || p.health.id === 'visual') {
+            delta = -10;
+            en = 'Very few accessible seats and poor guidance forced you to give up attending the concert.';
+            ko = '공연장 휠체어석이 극소수이고 안내 지원이 부족해 문화 관람을 포기해야 했습니다.';
+          } else if (p.housing.id === 'rural') {
+            delta = -10;
+            en = 'There are no theaters or libraries nearby, and round-trip travel to the city is too costly.';
+            ko = '거주지 주변에 공연장·도서관이 없고, 도시까지 왕복 교통비와 시간이 너무 많이 듭니다.';
+          } else if (p.wealth.id === 'low') {
+            delta = -8;
+            en = 'After paying for rent and food, you had zero budget left for cultural activities.';
+            ko = '생계비와 주거비를 내고 나면 티켓값이나 여가 활동에 쓸 여유가 전혀 없습니다.';
+          } else {
+            delta = 5;
+            en = 'You easily enjoyed local concerts and cultural centers on weekends to recharge.';
+            ko = '주말마다 집 근처 문화센터와 공연장을 자유롭게 이용하며 삶의 활력을 얻었습니다.';
+          }
+          return {
+            icon: '🎭',
+            titleEn: '7. Cultural & Leisure Life',
+            titleKo: '주말을 맞아 공연 관람과 문화 생활을 즐기려 합니다.',
+            prompt: '누구나 누려야 할 문화·여가 공간에 얼마나 쉽게 접근할 수 있을까요?',
+            delta, en, ko
+          };
+        })(),
+
+        // 8. Heatwave & Cooling Bills (checks housing, wealth, age)
+        (() => {
+          let delta = 0, en = '', ko = '';
+          if (p.housing.id === 'semi' && p.wealth.id === 'low') {
+            delta = -15;
+            en = 'In a humid semi-basement, fear of high electricity bills stopped you from using the AC.';
+            ko = '습하고 통풍이 안 되는 반지하방에서 전기요금 폭탄이 무서워 에어컨을 켜지 못했습니다.';
+          } else if (p.housing.id === 'rural') {
+            delta = -10;
+            en = 'Poor insulation in your old rural house trapped heat, putting you at risk of heatstroke.';
+            ko = '단열이 약한 노후 농촌 주택의 실내 온도가 치솟아 온열질환 위험에 시달렸습니다.';
+          } else if (p.age.id === 'elderly' && p.wealth.id !== 'high') {
+            delta = -12;
+            en = 'Worried about cooling bills, you struggled through the heatwave alone.';
+            ko = '폭염 속 냉방비 부담으로 에어컨을 끄고 무더위 쉼터를 찾아다니며 힘겹게 버텼습니다.';
+          } else if (p.wealth.id === 'low') {
+            delta = -10;
+            en = 'High summer electricity rates forced you to endure tropical nights with just one fan.';
+            ko = '여름철 전기요금 누진세가 부담되어 선풍기 한 대로 열대야를 견뎌야 했습니다.';
+          } else {
+            delta = 5;
+            en = 'In a well-insulated home, you ran the air conditioner comfortably all summer.';
+            ko = '단열이 잘된 주거 환경에서 걱정 없이 에어컨을 켜고 시원하게 여름을 보냈습니다.';
+          }
+          return {
+            icon: '☀️',
+            titleEn: '8. Extreme Heatwave & Cooling Bills',
+            titleKo: '낮 최고기온 38도의 기록적인 폭염이 이어집니다.',
+            prompt: '기후 위기로 인한 폭염 속에서 건강과 냉방비를 지킬 수 있을까요?',
+            delta, en, ko
+          };
+        })()
+      ];
     }
 
-    function enterSimulationWorld() {
-      score = 50;
-      currentStep = 0;
-      stepHistory = new Array(events.length).fill(null);
+    let evaluatedList = [];
 
-      const summaryBar = document.getElementById("personaSummaryBar");
-      summaryBar.innerHTML = `
-        <div>🎂 <b>${myPersona.age.en}</b></div>
-        <div>⚧️ <b>${myPersona.gender.en}</b></div>
-        <div>🌐 <b>${myPersona.background.en}</b></div>
-        <div>💰 <b>${myPersona.wealth.en}</b></div>
-        <div>♿ <b>${myPersona.disability.en}</b></div>
-        <div>🏡 <b>${myPersona.housing.en}</b></div>
-      `;
+    function startSimulation() {
+      score = 100;
+      stepIndex = 0;
+      historyLog = [];
+      evaluatedList = evaluateSituations(persona);
 
-      document.getElementById("scoreDisplay").innerText = score + " pts";
-      document.getElementById("lotteryScreen").classList.add("hidden");
-      document.getElementById("simScreen").classList.remove("hidden");
-      document.getElementById("scoreContainer").classList.remove("hidden");
+      document.getElementById('screenIntro').classList.add('hidden');
+      document.getElementById('screenResult').classList.add('hidden');
+      document.getElementById('screenSim').classList.remove('hidden');
+      document.getElementById('scoreBadge').classList.remove('hidden');
 
-      loadEvent(currentStep);
+      // Render mini profile chips
+      const mini = document.getElementById('miniProfile');
+      mini.innerHTML = Object.values(persona).map(item =>
+        `<span class="bg-slate-800 border border-slate-700 text-slate-200 px-2.5 py-1 rounded-full font-medium">${item.icon} ${item.labelKo}</span>`
+      ).join('');
+
+      renderSituation();
     }
 
-    function loadEvent(step) {
-      const e = events[step];
-      document.getElementById("stepBadge").innerText = `Situation ${step + 1} of ${events.length}`;
-      document.getElementById("eventTitle").innerText = e.titleEn;
-      document.getElementById("eventTitleKo").innerText = e.titleKo;
-      document.getElementById("eventDesc").innerText = e.descEn;
-      document.getElementById("eventDescKo").innerText = e.descKo;
+    function renderSituation() {
+      const sit = evaluatedList[stepIndex];
+      score += sit.delta;
+      historyLog.push(sit);
 
-      const prevBtn = document.getElementById("prevBtn");
-      if (step > 0) {
-        prevBtn.classList.remove("hidden");
+      // Update score badge
+      const scoreEl = document.getElementById('currentScoreText');
+      scoreEl.textContent = score;
+      scoreEl.className = score >= 90 ? 'text-emerald-400' : score >= 65 ? 'text-amber-400' : 'text-rose-400';
+
+      // Progress
+      document.getElementById('stepCounter').textContent = `Situation ${stepIndex + 1} / 8`;
+      document.getElementById('progressBar').style.width = `${((stepIndex + 1) / 8) * 100}%`;
+
+      // Content
+      document.getElementById('sitIcon').textContent = sit.icon;
+      document.getElementById('sitTitleEn').textContent = sit.titleEn;
+      document.getElementById('sitTitleKo').textContent = sit.titleKo;
+      document.getElementById('sitPrompt').textContent = sit.prompt;
+      document.getElementById('sitDescEn').textContent = sit.en;
+      document.getElementById('sitDescKo').textContent = sit.ko;
+
+      const outcomeBox = document.getElementById('outcomeBox');
+      const deltaBadge = document.getElementById('sitDelta');
+
+      if (sit.delta > 0) {
+        outcomeBox.className = 'rounded-xl p-4 border bg-emerald-950/50 border-emerald-500/40';
+        deltaBadge.className = 'text-sm font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300';
+        deltaBadge.textContent = `+${sit.delta} pts`;
+      } else if (sit.delta === 0) {
+        outcomeBox.className = 'rounded-xl p-4 border bg-slate-900/70 border-slate-600';
+        deltaBadge.className = 'text-sm font-extrabold px-2.5 py-0.5 rounded-full bg-slate-700 text-slate-200';
+        deltaBadge.textContent = `0 pts`;
       } else {
-        prevBtn.classList.add("hidden");
+        outcomeBox.className = 'rounded-xl p-4 border bg-rose-950/50 border-rose-500/40';
+        deltaBadge.className = 'text-sm font-extrabold px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300';
+        deltaBadge.textContent = `${sit.delta} pts`;
       }
 
-      const savedOutcome = stepHistory[step];
-      const box = document.getElementById("resultBox");
-
-      if (savedOutcome !== null) {
-        box.className = savedOutcome.neg 
-          ? "p-4 rounded-xl leading-relaxed mb-4 bg-rose-50 border border-rose-200 text-rose-800" 
-          : "p-4 rounded-xl leading-relaxed mb-4 bg-emerald-50 border border-emerald-200 text-emerald-800";
-        document.getElementById("resultEn").innerText = savedOutcome.en;
-        document.getElementById("resultKo").innerText = savedOutcome.ko;
-        box.classList.remove("hidden");
-
-        document.getElementById("resolveBtn").classList.add("hidden");
-        document.getElementById("nextBtn").classList.remove("hidden");
+      const nextBtn = document.getElementById('nextSitBtn');
+      if (stepIndex === 7) {
+        nextBtn.textContent = '최종 결과 & 8가지 요약 보기 (Review My 8 Situations) →';
+        nextBtn.className = 'w-full bg-emerald-600 hover:bg-emerald-500 active:scale-95 transition text-white font-bold py-3.5 rounded-2xl text-base';
       } else {
-        box.classList.add("hidden");
-        document.getElementById("resolveBtn").classList.remove("hidden");
-        document.getElementById("nextBtn").classList.add("hidden");
+        nextBtn.textContent = '다음 상황 보기 (Next Situation) →';
+        nextBtn.className = 'w-full bg-indigo-600 hover:bg-indigo-500 active:scale-95 transition text-white font-bold py-3.5 rounded-2xl text-base';
       }
     }
 
-    function resolveEvent() {
-      if (stepHistory[currentStep] !== null) return;
-
-      const e = events[currentStep];
-      const outcome = e.resolve(myPersona);
-      stepHistory[currentStep] = outcome;
-
-      score += outcome.score;
-      document.getElementById("scoreDisplay").innerText = score + " pts";
-
-      const box = document.getElementById("resultBox");
-      box.className = outcome.neg 
-        ? "p-4 rounded-xl leading-relaxed mb-4 bg-rose-50 border border-rose-200 text-rose-800 pop-in" 
-        : "p-4 rounded-xl leading-relaxed mb-4 bg-emerald-50 border border-emerald-200 text-emerald-800 pop-in";
-      
-      document.getElementById("resultEn").innerText = outcome.en;
-      document.getElementById("resultKo").innerText = outcome.ko;
-      box.classList.remove("hidden");
-
-      document.getElementById("resolveBtn").classList.add("hidden");
-      document.getElementById("nextBtn").classList.remove("hidden");
-    }
-
-    function prevEvent() {
-      if (currentStep > 0) {
-        currentStep--;
-        loadEvent(currentStep);
-      }
-    }
-
-    function nextEvent() {
-      currentStep++;
-      if (currentStep < events.length) {
-        loadEvent(currentStep);
+    function nextSituation() {
+      if (stepIndex < 7) {
+        stepIndex++;
+        renderSituation();
       } else {
-        showEnd();
+        showSummary();
       }
     }
 
-    function showEnd() {
-      document.getElementById("simScreen").classList.add("hidden");
-      document.getElementById("endScreen").classList.remove("hidden");
-      document.getElementById("finalScore").innerText = score + " pts";
-      
-      let status = "";
-      if (score >= 65) status = "🌟 Stable & Protected Life (안정적인 삶)";
-      else if (score >= 40) status = "⚠️ Vulnerable to Crises (위기에 취약한 상태)";
-      else status = "🚨 Severe Human Rights Crisis (기본권 침해 위기)";
-      
-      document.getElementById("finalStatus").innerText = status;
+    function showSummary() {
+      document.getElementById('screenSim').classList.add('hidden');
+      document.getElementById('screenResult').classList.remove('hidden');
 
-      const logContainer = document.getElementById("fullHistoryLog");
-      logContainer.innerHTML = stepHistory.map((item, idx) => {
-        if (!item) return "";
-        const scoreTag = item.score > 0 ? `+${item.score} pts` : `${item.score} pts`;
-        const colorClass = item.neg ? "text-rose-700 bg-rose-100" : "text-emerald-800 bg-emerald-100";
+      document.getElementById('finalScoreDisplay').textContent = `${score} pts`;
+
+      const statusCard = document.getElementById('statusCard');
+      const statusText = document.getElementById('finalStatusDisplay');
+
+      if (score >= 90) {
+        statusCard.className = 'border rounded-2xl p-4 text-center flex flex-col justify-center bg-emerald-950/50 border-emerald-500/40 text-emerald-300';
+        statusText.textContent = 'Stable (안정)';
+      } else if (score >= 60) {
+        statusCard.className = 'border rounded-2xl p-4 text-center flex flex-col justify-center bg-amber-950/50 border-amber-500/40 text-amber-300';
+        statusText.textContent = 'Vulnerable (취약)';
+      } else {
+        statusCard.className = 'border rounded-2xl p-4 text-center flex flex-col justify-center bg-rose-950/50 border-rose-500/40 text-rose-300';
+        statusText.textContent = 'Crisis (위기)';
+      }
+
+      // Find hardest barrier (lowest delta)
+      const worst = [...historyLog].sort((a, b) => a.delta - b.delta)[0];
+      const hardestEl = document.getElementById('hardestBarrierText');
+      if (worst && worst.delta < 0) {
+        hardestEl.textContent = `${worst.icon} ${worst.titleEn} (${worst.delta} pts) — ${worst.titleKo}`;
+      } else {
+        hardestEl.textContent = '큰 위기 없이 모든 상황을 안정적으로 통과했습니다! (No major barrier)';
+      }
+
+      // Render all 8 situations
+      const list = document.getElementById('reviewList');
+      list.innerHTML = historyLog.map(item => {
+        const badgeColor = item.delta > 0
+          ? 'text-emerald-300 bg-emerald-500/20'
+          : item.delta === 0
+            ? 'text-slate-300 bg-slate-700'
+            : 'text-rose-300 bg-rose-500/20';
+        const sign = item.delta > 0 ? `+${item.delta}` : `${item.delta}`;
         return `
-          <div class="p-3 rounded-xl border border-slate-200 bg-slate-50">
-            <div class="flex justify-between items-center font-bold text-slate-800 text-xs sm:text-sm">
-              <span>${idx + 1}. ${events[idx].titleEn.replace(/Situation \d+: /, '')}</span>
-              <span class="px-2 py-0.5 rounded-md text-xs font-extrabold ${colorClass}">${scoreTag}</span>
+          <div class="bg-slate-800/70 border border-slate-700/80 rounded-xl p-3 flex items-start justify-between gap-3">
+            <div>
+              <div class="text-xs font-bold text-white">${item.icon} ${item.titleEn}</div>
+              <div class="text-xs text-slate-300 mt-0.5">${item.ko}</div>
             </div>
-            <p class="text-xs sm:text-sm text-slate-600 mt-1 leading-snug">${item.ko}</p>
+            <span class="shrink-0 text-xs font-extrabold px-2 py-1 rounded-lg ${badgeColor}">${sign} pts</span>
           </div>
         `;
-      }).join("");
+      }).join('');
     }
 
-    function toggleSummaryLog() {
-      const log = document.getElementById("fullHistoryLog");
-      const arrow = document.getElementById("toggleArrow");
-      log.classList.toggle("hidden");
-      arrow.innerText = log.classList.contains("hidden") ? "▼" : "▲";
-    }
-
-    function backToLastSituation() {
-      document.getElementById("endScreen").classList.add("hidden");
-      document.getElementById("simScreen").classList.remove("hidden");
-      currentStep = events.length - 1;
-      loadEvent(currentStep);
-    }
-
-    function resetAll() {
-      myPersona = { age: null, gender: null, background: null, wealth: null, disability: null, housing: null };
-      stepHistory = new Array(events.length).fill(null);
-      
-      Object.keys(attributes).forEach(type => {
-        document.getElementById(`front-${type}`).classList.remove("hidden");
-        document.getElementById(`back-${type}`).classList.add("hidden");
-      });
-
-      const btn = document.getElementById("startSimBtn");
-      btn.disabled = true;
-      btn.className = "w-full bg-slate-300 text-slate-500 font-bold py-3.5 rounded-xl text-sm transition duration-200 shadow cursor-not-allowed";
-      btn.innerText = "Reveal All 6 Cards to Start (6개를 모두 뽑아야 시작됩니다)";
-
-      document.getElementById("endScreen").classList.add("hidden");
-      document.getElementById("fullHistoryLog").classList.add("hidden");
-      document.getElementById("toggleArrow").innerText = "▼";
-      document.getElementById("scoreContainer").classList.add("hidden");
-      document.getElementById("lotteryScreen").classList.remove("hidden");
+    function resetGame() {
+      document.getElementById('screenResult').classList.add('hidden');
+      document.getElementById('scoreBadge').classList.add('hidden');
+      document.getElementById('screenIntro').classList.remove('hidden');
     }
   </script>
 </body>
