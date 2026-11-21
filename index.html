@@ -371,19 +371,26 @@
         }
       },
       {
-        titleEn: "Situation 6: Job Interview & Fair Hiring",
-        titleKo: "상황 6: 취업 면접과 공정한 채용 (SDG 8 양질의 일자리)",
-        descEn: "You apply for a stable job and attend an in-person final interview.",
-        descKo: "안정적인 정규직 일자리에 지원하여 최종 대면 면접에 참여합니다.",
+        {
+        titleEn: "Situation 6: Earning Income & Fair Work",
+        titleKo: "상황 6: 일자리 지원과 공정한 대우 (SDG 8 양질의 일자리)",
+        descEn: "You apply for work suited to your age and situation, hoping for fair treatment.",
+        descKo: "나의 나이와 조건에 맞는 일자리(아르바이트·채용·노인 일자리)에 지원합니다.",
         resolve: (p) => {
           if (p.background.id === "refugee" || p.background.id === "migrant_worker") {
             return { score: -15, en: "Visa restrictions and social prejudice blocked hiring. (-15 pts)", ko: "비자 규제와 편견의 벽에 부딪혀 채용에서 탈락했습니다. (-15점)", neg: true };
+          } else if (p.age.id === "teen") {
+            return { score: -10, en: "As a teen, you faced unfair part-time terms and below-minimum wage offers. (-10 pts)", ko: "청소년 아르바이트 자리에서 근로계약서 미작성과 최저임금 미지급 등 불공정한 대우를 겪었습니다. (-10점)", neg: true };
+          } else if (p.age.id === "elderly") {
+            return { score: -10, en: "Because of your age, you were rejected even from simple senior jobs. (-10 pts)", ko: "나이가 많다는 이유로 단순 일자리조차 서류 단계에서 탈락했습니다. (-10점)", neg: true };
           } else if (p.gender.id === "female" && (p.age.id === "job_seeker" || p.age.id === "middle_aged")) {
             return { score: -10, en: "Faced unfair questions about marriage and childcare during interview. (-10 pts)", ko: "면접에서 결혼과 육아에 대한 불공정한 질문을 받았습니다. (-10점)", neg: true };
           } else if (p.disability.id === "wheelchair") {
-            return { score: -10, en: "The company building lacked accessible ramps and elevators. (-10 pts)", ko: "회사 건물에 경사로와 엘리베이터가 없어 면접장에 가기 힘들었습니다. (-10점)", neg: true };
+            return { score: -10, en: "The workplace lacked accessible ramps and elevators. (-10 pts)", ko: "근무지에 경사로와 엘리베이터가 없어 일할 기회를 얻지 못했습니다. (-10점)", neg: true };
           }
-          return { score: +10, en: "Successfully passed the interview based purely on skills! (+10 pts)", ko: "직무 역량을 인정받아 성공적으로 합격했습니다! (+10점)", neg: false };
+          return { score: +10, en: "Successfully passed the interview based purely on skills! (+10 pts)", ko: "직무 역량을 인정받아 공정하게 합격했습니다! (+10점)", neg: false };
+        }
+      },
         }
       },
       {
